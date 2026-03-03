@@ -1,0 +1,27 @@
+{
+  "account_id": "xyz_hvac",
+  "company_name": "XYZ HVAC Services",
+  "business_hours": {
+    "days": [
+      "Monday to Friday"
+    ],
+    "start": "7am",
+    "end": "4pm",
+    "timezone": ""
+  },
+  "office_address": "",
+  "services_supported": [
+    "hvac"
+  ],
+  "emergency_definition": [],
+  "emergency_routing_rules": {},
+  "non_emergency_routing_rules": {},
+  "call_transfer_rules": {},
+  "integration_constraints": [],
+  "after_hours_flow_summary": "Greet → Confirm emergency → If emergency collect details immediately → Attempt transfer → Fallback → Non-emergency collect details → Close",
+  "office_hours_flow_summary": "Greet → Ask purpose → Collect name & number → Route/Transfer → Fallback → Close",
+  "questions_or_unknowns": [
+    "Emergency definition unclear"
+  ],
+  "notes": "Generated from demo transcript (v1)"
+}

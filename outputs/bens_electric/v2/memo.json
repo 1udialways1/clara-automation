@@ -1,0 +1,30 @@
+{
+  "account_id": "bens_electric",
+  "company_name": "Ben’s Electric",
+  "business_hours": {
+    "days": [],
+    "start": "",
+    "end": "",
+    "timezone": ""
+  },
+  "office_address": "",
+  "services_supported": [
+    "electrical"
+  ],
+  "emergency_definition": [],
+  "emergency_routing_rules": {},
+  "non_emergency_routing_rules": {},
+  "call_transfer_rules": {
+    "timeout_seconds": 45
+  },
+  "integration_constraints": [
+    "Never create electrical jobs in ServiceTrade"
+  ],
+  "after_hours_flow_summary": "Greet → Confirm emergency → If emergency collect details immediately → Attempt transfer → Fallback → Non-emergency collect details → Close",
+  "office_hours_flow_summary": "Greet → Ask purpose → Collect name & number → Route/Transfer → Fallback → Close",
+  "questions_or_unknowns": [
+    "Business hours not specified",
+    "Emergency definition unclear"
+  ],
+  "notes": "Generated from demo transcript (v1)"
+}

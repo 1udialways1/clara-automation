@@ -1,0 +1,2 @@
+Transfer timeout should be 40 seconds.
+Never create sprinkler jobs in ServiceTrade.

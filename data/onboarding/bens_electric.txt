@@ -1,0 +1,2 @@
+Transfer timeout should be 45 seconds.
+Never create electrical jobs in ServiceTrade.

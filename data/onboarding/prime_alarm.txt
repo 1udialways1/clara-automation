@@ -1,0 +1,2 @@
+Transfer timeout should be 55 seconds.
+Never create alarm jobs in ServiceTrade.

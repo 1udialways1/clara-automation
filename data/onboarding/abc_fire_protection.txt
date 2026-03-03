@@ -1,0 +1,3 @@
+All sprinkler emergencies must go directly to dispatch.
+Transfer timeout should be 60 seconds.
+Never create sprinkler jobs in ServiceTrade.

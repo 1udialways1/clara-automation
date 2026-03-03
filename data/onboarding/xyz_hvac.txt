@@ -1,0 +1,2 @@
+Transfer timeout should be 50 seconds.
+Never create HVAC jobs in ServiceTrade.

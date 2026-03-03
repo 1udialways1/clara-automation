@@ -1,0 +1,16 @@
+{
+  "version_from": "v1",
+  "version_to": "v2",
+  "applied_patch": {
+    "call_transfer_rules": {
+      "timeout_seconds": 55
+    }
+  },
+  "detailed_changes": [
+    {
+      "field": "call_transfer_rules.timeout_seconds",
+      "old_value": null,
+      "new_value": 55
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "clara-automation",
+  "version": "1.0.0",
+  "description": "Zero-cost automation pipeline for Clara Answers demo and onboarding workflows",
+  "main": "runAll.js",
+  "scripts": {
+    "start": "node runAll.js",
+    "demo": "node scripts/extractDemo.js",
+    "onboarding": "node scripts/applyOnboarding.js",
+    "generate": "node scripts/generateAgent.js"
+  },
+  "keywords": [
+    "automation",
+    "n8n",
+    "clara",
+    "retell",
+    "zero-cost"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

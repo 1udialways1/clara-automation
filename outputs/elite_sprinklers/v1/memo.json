@@ -1,0 +1,29 @@
+{
+  "account_id": "elite_sprinklers",
+  "company_name": "Elite Sprinklers",
+  "business_hours": {
+    "days": [
+      "Monday to Friday"
+    ],
+    "start": "9am",
+    "end": "6pm",
+    "timezone": ""
+  },
+  "office_address": "",
+  "services_supported": [
+    "sprinkler"
+  ],
+  "emergency_definition": [
+    "sprinkler leak"
+  ],
+  "emergency_routing_rules": {
+    "route_to": "dispatch"
+  },
+  "non_emergency_routing_rules": {},
+  "call_transfer_rules": {},
+  "integration_constraints": [],
+  "after_hours_flow_summary": "Greet → Confirm emergency → If emergency collect details immediately → Attempt transfer → Fallback → Non-emergency collect details → Close",
+  "office_hours_flow_summary": "Greet → Ask purpose → Collect name & number → Route/Transfer → Fallback → Close",
+  "questions_or_unknowns": [],
+  "notes": "Generated from demo transcript (v1)"
+}
