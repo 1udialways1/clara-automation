@@ -1,94 +1,85 @@
-# Clara Answers – Zero-Cost Automation Pipeline
+# Clara Answers – Technical Associate Intern Assignment
+
+**Technical Associate – Clara Answers Intern Assignment Implementation**
+
+This repository implements a zero-cost, end-to-end automation pipeline that processes:
+
+- 5 Demo Call Transcripts
+- 5 Onboarding Call Transcripts
+
+It generates:
+
+- Versioned Account Memos (v1 and v2)
+- Retell Agent Draft Specifications (v1 and v2)
+- Field-level Change Logs
+- Task Tracking Records
+
+The system runs entirely locally using Node.js and Docker (n8n self-hosted).  
+No paid APIs or external LLM services are used.
+
+---
 
 ## Overview
 
-This project implements a fully automated, zero-cost pipeline that converts:
+This project simulates Clara Answers' real-world workflow:
 
-Demo Call Transcript  
-→ Structured Account Memo (v1)  
-→ Retell Agent Draft Specification  
-→ Onboarding Updates  
-→ Versioned Agent Revision (v2)
+Demo Call → Structured Account Memo (v1)  
+Onboarding Call → Confirmed Account Memo (v2)  
+→ Retell Agent Configuration Draft  
+→ Versioned Change Tracking  
 
-The system simulates Clara Answers’ real-world onboarding workflow:
+The system emphasizes:
 
-Human conversations → Structured operational rules → AI voice agent configuration.
-
-The entire solution runs locally using:
-
-- Node.js
-- Docker
-- n8n (self-hosted)
-- JSON file storage
-
-No paid APIs, external LLMs, or paid services are used.
-
----
-
-# Architecture & Data Flow
-Demo Transcript (.txt)
-↓
-extractDemo.js
-↓
-v1 Account Memo (JSON)
-↓
-generateAgent.js
-↓
-v1 Retell Agent Spec
-↓
-Onboarding Transcript (.txt)
-↓
-applyOnboarding.js
-↓
-Conflict-aware Patch Merge
-↓
-v2 Account Memo
-↓
-generateAgent.js
-↓
-v2 Retell Agent Spec
-↓
-Task Tracker Log
-
-
-n8n (Docker) acts as the orchestration layer.
-The full automation pipeline is executed via:
-
-
-node runAll.js
-
-
-This ensures:
-
-- Zero-cost compliance
+- Structured extraction
+- Explicit versioning
+- Safe patch application
+- Change transparency
 - Reproducibility
-- Local execution
-- Batch processing
-- Idempotency
+- Zero-cost compliance
 
 ---
 
-# Folder Structure
+## Architecture
+Demo Transcript (.txt)
+→ extractDemo.js
+→ account_memo (v1)
+→ generateAgent.js
+→ agent_spec (v1)
+→ applyOnboarding.js
+→ updated memo (v2)
+→ generateAgent.js
+→ agent_spec (v2)
+→ changes.json
+→ taskTracker.js
 
+**Orchestration Layer:** Docker + n8n  
+**Execution Layer:** Node.js scripts  
 
+---
+
+## Folder Structure
 clara-automation/
 │
 ├── data/
-│ ├── demo/
-│ └── onboarding/
+│ ├── demo/ # 5 demo transcripts
+│ └── onboarding/ # 5 onboarding transcripts
 │
 ├── scripts/
 │ ├── extractDemo.js
 │ ├── applyOnboarding.js
 │ ├── generateAgent.js
-│ ├── taskTracker.js
-│ └── runAll.js
+│ └── taskTracker.js
 │
 ├── outputs/
-│ └── <account_id>/
-│ ├── v1/
-│ ├── v2/
-│ └── changes.json
+│ ├── abc_fire_protection/
+│ │ ├── v1/
+│ │ │ ├── memo.json
+│ │ │ └── agent_spec.json
+│ │ ├── v2/
+│ │ │ ├── memo.json
+│ │ │ └── agent_spec.json
+│ │ └── changes.json
+│ └── ... (5 accounts total)
 │
 ├── tracking/
 │ └── tasks.json
@@ -103,186 +94,227 @@ clara-automation/
 
 ---
 
-# How to Run Locally
+## Dataset Assumptions
 
-## 1️⃣ Prerequisites
+This repository assumes:
+
+- 5 demo transcripts in `data/demo/`
+- 5 onboarding transcripts in `data/onboarding/`
+
+All 10 files are processed in batch.
+
+---
+
+## How to Run Locally
+
+### Prerequisites
 
 - Node.js (v18+ recommended)
 - Docker Desktop installed and running
 
 ---
 
-## 2️⃣ Run Full Pipeline
+### Batch Run (All Accounts)
 
+Run the full dataset end-to-end:
 
+``` bash
 npm start
-
-
 or
-
-
 node runAll.js
-
-
+```
 This will:
 
-- Process all demo transcripts
-- Generate v1 memos
-- Generate v1 agent specs
-- Apply onboarding updates
-- Generate v2 memos
-- Generate v2 agent specs
-- Log task tracker entries
+Process 5 demo transcripts → v1 memos
 
----
+Generate 5 agent_spec (v1)
 
-# Running via Docker + n8n (Orchestrator Layer)
+Process 5 onboarding transcripts → v2 memos
 
-## 1️⃣ Start Docker
+Generate 5 agent_spec (v2)
 
+Produce changes.json per account
+
+Log task stages in tracking/tasks.json
+
+The pipeline is idempotent — running it multiple times safely overwrites structured outputs without duplication.
+
+Orchestrator (n8n)
+
+Start Docker:
 
 docker compose up
 
-
-## 2️⃣ Open n8n
-
+Open:
 
 http://localhost:5678
 
-
-## 3️⃣ Import Workflow
-
 Import:
-
 
 workflows/n8n-workflow.json
 
+The file workflows/n8n-workflow.json is the exact exported workflow from n8n and can be imported directly without additional configuration.
 
-## 4️⃣ Execute Workflow
+Output Artifacts
 
-Click "Execute Workflow".
+For each account:
 
-The workflow acts as orchestration trigger.
-The actual automation pipeline runs locally via:
+v1/memo.json
 
+v1/agent_spec.json
 
-node runAll.js
+v2/memo.json
 
+v2/agent_spec.json
 
----
+changes.json
 
-# Account Memo Schema
+Example changes.json
+{
+  "version_from": "v1",
+  "version_to": "v2",
+  "detailed_changes": [
+    {
+      "field": "business_hours",
+      "old": "Mon-Fri 9-5",
+      "new": "Mon-Fri 8-6",
+      "reason": "Confirmed during onboarding call"
+    }
+  ]
+}
 
-Each memo includes:
+No hallucinated fields are introduced.
+Missing data is placed in questions_or_unknowns.
 
-- account_id
-- company_name
-- business_hours
-- office_address
-- services_supported
-- emergency_definition
-- emergency_routing_rules
-- non_emergency_routing_rules
-- call_transfer_rules
-- integration_constraints
-- after_hours_flow_summary
-- office_hours_flow_summary
-- questions_or_unknowns
-- notes
+Retell Setup & Manual Import
 
-Missing data is explicitly flagged under `questions_or_unknowns`.
-No hallucinated values are added.
+This project generates Retell Agent Draft Specifications as JSON files.
+To maintain zero-cost compliance, the Retell API is not called directly.
 
----
+Step 1 — Create Free Retell Account
 
-# Versioning & Conflict Handling
+Go to https://retellai.com
 
-- v1 = Demo-derived assumptions
-- v2 = Onboarding-confirmed configuration
-- Field-level conflict tracking
-- Safe array merging
-- No unrelated fields overwritten
-- Explicit change logging in `changes.json`
+Sign up for the free tier
 
-Each `changes.json` includes:
+Create a new Voice Agent
 
-- version_from
-- version_to
-- applied_patch
-- detailed_changes (field-level diff)
+Step 2 — Locate Generated Spec
 
----
+Example:
 
-# Task Tracker
+outputs/abc_fire_protection/v2/agent_spec.json
+Step 3 — Manual Import
 
-The system includes a lightweight task tracker:
+Open the agent_spec.json file
 
+Copy:
 
-tracking/tasks.json
+Agent name
 
+System prompt
 
-Each stage logs:
+Flow logic
 
-- account_id
-- stage (demo_processed / onboarding_processed)
-- timestamp
-- status
+Transfer rules
 
-This simulates integration with a task management system.
+Paste into Retell UI fields
 
----
+Save the agent
 
-# Zero-Cost Compliance
+This mirrors how production systems would push configuration via API.
 
-This project strictly follows zero-spend constraints:
+Mapping to Assignment Requirements
+Pipeline A (Demo → v1)
 
-- No paid APIs
-- No external LLM calls
-- No cloud services
-- Rule-based extraction only
-- Self-hosted Docker + n8n
+Ingest demo transcript
 
-All components are fully reproducible locally.
+Extract structured Account Memo JSON
 
----
+Generate Retell Agent Draft Spec v1
 
-# Idempotency & Reliability
+Store outputs in versioned folders
 
-- Running the pipeline multiple times does not corrupt data.
-- Patches are applied only if changes are detected.
-- Outputs are versioned cleanly.
-- Folder structure is deterministic.
+Create task tracker entry
 
----
+Pipeline B (Onboarding → v2)
 
-# Known Limitations
+Ingest onboarding transcript
 
-- Extraction is rule-based (not LLM-powered).
-- Transcript phrasing variations may affect detection accuracy.
-- No direct Retell API integration (spec generated as JSON draft).
-- No UI dashboard or diff visualizer (future enhancement).
+Apply structured patch
 
----
+Generate Retell Agent Draft Spec v2
 
-# Future Improvements (Production Version)
+Produce field-level changelog
 
-With production access:
+Log task tracker entry
 
-- LLM-based structured extraction
-- Direct Retell API integration
-- Real task management integration (e.g., Asana/Supabase)
-- Structured onboarding form ingestion
-- Advanced rule engine for routing logic
-- UI dashboard with diff viewer
+Non-Functional Requirements
 
----
+Zero-cost (no paid APIs used)
 
-# What This Demonstrates
+End-to-end batch execution
 
-- Systems thinking
-- Schema design for operational logic
-- Safe automation under uncertainty
-- Version-controlled AI agent configuration
-- Clear separation of exploratory vs confirmed data
-- Reproducible infrastructure
+Idempotent processing
 
+Local orchestration via Docker + n8n
+
+Clear versioning and diff tracking
+
+Reproducible folder structure
+
+Zero-Cost Compliance
+
+No paid APIs
+
+No external LLM services
+
+No cloud compute
+
+Rule-based extraction
+
+Self-hosted n8n via Docker
+
+Local JSON storage
+
+Limitations
+
+Extraction is rule-based (not LLM-powered)
+
+Transcript phrasing variations may reduce extraction accuracy
+
+Retell integration is manual (spec-only mode)
+
+No production database
+
+Future Improvements
+
+LLM-based structured extraction
+
+Direct Retell API integration
+
+Persistent database storage
+
+Admin dashboard for diff visualization
+
+Robust schema validation
+
+Conclusion
+
+This implementation demonstrates:
+
+Systems thinking
+
+Structured schema design
+
+Version-controlled automation
+
+Safe patch merging
+
+Explicit change tracking
+
+Zero-cost execution
+
+Reproducible orchestration
+
+The pipeline is complete, versioned, batch-capable, and aligned with the Clara Answers assignment requirements.
