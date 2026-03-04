@@ -17,13 +17,11 @@
   "emergency_routing_rules": {},
   "non_emergency_routing_rules": {},
   "call_transfer_rules": {
-    "timeout_seconds": 55
+    "timeout_seconds": 30
   },
   "integration_constraints": [],
-  "after_hours_flow_summary": "Greet → Confirm emergency → If emergency collect details immediately → Attempt transfer → Fallback → Non-emergency collect details → Close",
-  "office_hours_flow_summary": "Greet → Ask purpose → Collect name & number → Route/Transfer → Fallback → Close",
-  "questions_or_unknowns": [
-    "Emergency definition unclear"
-  ],
+  "after_hours_flow_summary": "Greet → Confirm emergency → If emergency collect details → Attempt transfer → Otherwise record request → Close",
+  "office_hours_flow_summary": "Greet → Ask purpose → Collect name & number → Route call → Attempt transfer → Close politely",
+  "questions_or_unknowns": [],
   "notes": "Generated from demo transcript (v1)"
 }

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { createTask } = require('./taskTracker');
 
 function extractDemo(transcriptText) {
 
@@ -22,17 +23,28 @@ function extractDemo(transcriptText) {
         notes: "Generated from demo transcript (v1)"
     };
 
-    // Company
-    const companyMatch = transcriptText.match(/this is (.+?)\./i);
-    if (companyMatch) {
-        memo.company_name = companyMatch[1].trim();
-    } else {
-        memo.questions_or_unknowns.push("Company name not specified in demo");
+    // Company name detection
+    const companyPatterns = [
+        /this is (.+?)\./i,
+        /welcome to (.+?)\./i,
+        /thank you for calling (.+?)\./i
+    ];
+
+    for (let pattern of companyPatterns) {
+        const match = transcriptText.match(pattern);
+        if (match) {
+            memo.company_name = match[1].trim();
+            break;
+        }
     }
 
-    // Business Hours
+    if (!memo.company_name) {
+        memo.questions_or_unknowns.push("Company name not found");
+    }
+
+    // Business hours
     const hoursMatch = transcriptText.match(
-        /(Monday.*?Friday).*?(\d+am).*?(\d+pm).*?(EST|CST|PST|GMT)?/i
+        /(monday.*?friday).*?(\d+\s*am).*?(\d+\s*pm).*?(est|cst|pst|gmt)?/i
     );
 
     if (hoursMatch) {
@@ -40,8 +52,6 @@ function extractDemo(transcriptText) {
         memo.business_hours.start = hoursMatch[2];
         memo.business_hours.end = hoursMatch[3];
         memo.business_hours.timezone = hoursMatch[4] || "";
-    } else {
-        memo.questions_or_unknowns.push("Business hours not specified");
     }
 
     // Address
@@ -51,51 +61,59 @@ function extractDemo(transcriptText) {
     }
 
     // Services
-    const services = ["sprinkler", "fire alarm", "electrical", "hvac", "inspection"];
-    services.forEach(service => {
+    const serviceKeywords = [
+        "sprinkler",
+        "fire alarm",
+        "inspection",
+        "repair",
+        "maintenance",
+        "hvac",
+        "electrical"
+    ];
+
+    serviceKeywords.forEach(service => {
         if (text.includes(service)) {
             memo.services_supported.push(service);
         }
     });
 
-    if (memo.services_supported.length === 0) {
-        memo.questions_or_unknowns.push("Services supported not clearly specified");
-    }
+    // Emergency keywords
+    const emergencyKeywords = [
+        "sprinkler leak",
+        "fire alarm failure",
+        "gas leak",
+        "fire emergency"
+    ];
 
-    // Emergency
-    if (text.includes("sprinkler leak")) {
-        memo.emergency_definition.push("sprinkler leak");
-        memo.emergency_routing_rules.route_to = "dispatch";
-    }
+    emergencyKeywords.forEach(keyword => {
+        if (text.includes(keyword)) {
+            memo.emergency_definition.push(keyword);
+        }
+    });
 
-    if (memo.emergency_definition.length === 0) {
-        memo.questions_or_unknowns.push("Emergency definition unclear");
-    }
-
-    // Non-emergency
-    if (text.includes("non emergency") || text.includes("inspection")) {
-        memo.non_emergency_routing_rules = {
-            collect_details: true,
-            follow_up_next_business_day: true
+    if (memo.emergency_definition.length > 0) {
+        memo.emergency_routing_rules = {
+            route_to: "dispatch",
+            priority: "high"
         };
     }
 
     // Transfer timeout
     const timeoutMatch = transcriptText.match(/(\d+)\s*seconds/i);
-    if (timeoutMatch) {
-        memo.call_transfer_rules.timeout_seconds = parseInt(timeoutMatch[1]);
-    }
+    memo.call_transfer_rules.timeout_seconds = timeoutMatch
+        ? parseInt(timeoutMatch[1])
+        : 30;
 
     memo.office_hours_flow_summary =
-        "Greet → Ask purpose → Collect name & number → Route/Transfer → Fallback → Close";
+        "Greet → Ask purpose → Collect name & number → Route call → Attempt transfer → Close politely";
 
     memo.after_hours_flow_summary =
-        "Greet → Confirm emergency → If emergency collect details immediately → Attempt transfer → Fallback → Non-emergency collect details → Close";
+        "Greet → Confirm emergency → If emergency collect details → Attempt transfer → Otherwise record request → Close";
 
     return memo;
 }
 
-// Batch
+// Batch processing
 const demoDir = path.join(__dirname, '..', 'data', 'demo');
 const demoFiles = fs.readdirSync(demoDir);
 
@@ -114,6 +132,8 @@ demoFiles.forEach(file => {
         path.join(outputDir, 'memo.json'),
         JSON.stringify(memo, null, 2)
     );
+
+    createTask(accountId, "demo_processed");
 
     console.log(`✅ v1 generated for ${accountId}`);
 });

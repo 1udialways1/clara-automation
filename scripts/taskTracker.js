@@ -12,13 +12,22 @@ if (!fs.existsSync(taskFile)) {
     fs.writeFileSync(taskFile, JSON.stringify([], null, 2));
 }
 
+function readTasks() {
+    try {
+        return JSON.parse(fs.readFileSync(taskFile, 'utf-8'));
+    } catch {
+        return [];
+    }
+}
+
 function createTask(accountId, stage) {
 
-    const tasks = JSON.parse(fs.readFileSync(taskFile));
+    const tasks = readTasks();
 
     const newTask = {
+        task_id: `task_${Date.now()}`,
         account_id: accountId,
-        stage: stage, // demo_processed or onboarding_processed
+        stage: stage,
         timestamp: new Date().toISOString(),
         status: "completed"
     };

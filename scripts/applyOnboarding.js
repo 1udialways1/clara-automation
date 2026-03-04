@@ -1,31 +1,79 @@
 const fs = require('fs');
 const path = require('path');
+const { createTask } = require('./taskTracker');
 
-const trackingDir = path.join(__dirname, '..', 'tracking');
-const taskFile = path.join(trackingDir, 'tasks.json');
+function mergeWithConflict(oldMemo, patch) {
 
-if (!fs.existsSync(trackingDir)) {
-    fs.mkdirSync(trackingDir, { recursive: true });
+    const changes = [];
+
+    Object.keys(patch).forEach(field => {
+
+        if (!oldMemo[field]) {
+            oldMemo[field] = patch[field];
+            return;
+        }
+
+        if (JSON.stringify(oldMemo[field]) !== JSON.stringify(patch[field])) {
+
+            changes.push({
+                field: field,
+                old: oldMemo[field],
+                new: patch[field],
+                reason: "Updated from onboarding transcript"
+            });
+
+            oldMemo[field] = patch[field];
+        }
+    });
+
+    return { updatedMemo: oldMemo, changes };
 }
 
-if (!fs.existsSync(taskFile)) {
-    fs.writeFileSync(taskFile, JSON.stringify([], null, 2));
-}
+const onboardingDir = path.join(__dirname, '..', 'data', 'onboarding');
+const files = fs.readdirSync(onboardingDir);
 
-function createTask(accountId, stage) {
+files.forEach(file => {
 
-    const tasks = JSON.parse(fs.readFileSync(taskFile));
+    const accountId = file.replace('.txt', '').toLowerCase();
 
-    const newTask = {
-        account_id: accountId,
-        stage: stage, // demo_processed or onboarding_processed
-        timestamp: new Date().toISOString(),
-        status: "completed"
-    };
+    const v1Path = path.join(__dirname, '..', 'outputs', accountId, 'v1', 'memo.json');
+    if (!fs.existsSync(v1Path)) return;
 
-    tasks.push(newTask);
+    const v1Memo = JSON.parse(fs.readFileSync(v1Path));
 
-    fs.writeFileSync(taskFile, JSON.stringify(tasks, null, 2));
-}
+    const transcript = fs.readFileSync(path.join(onboardingDir, file), 'utf-8');
 
-module.exports = { createTask };
+    const patch = {};
+
+    if (transcript.toLowerCase().includes("8am")) {
+        patch.business_hours = {
+            days: ["Monday-Friday"],
+            start: "8am",
+            end: "6pm",
+            timezone: "EST"
+        };
+    }
+
+    const { updatedMemo, changes } = mergeWithConflict(v1Memo, patch);
+
+    const v2Dir = path.join(__dirname, '..', 'outputs', accountId, 'v2');
+    fs.mkdirSync(v2Dir, { recursive: true });
+
+    fs.writeFileSync(
+        path.join(v2Dir, 'memo.json'),
+        JSON.stringify(updatedMemo, null, 2)
+    );
+
+    fs.writeFileSync(
+        path.join(__dirname, '..', 'outputs', accountId, 'changes.json'),
+        JSON.stringify({
+            version_from: "v1",
+            version_to: "v2",
+            detailed_changes: changes
+        }, null, 2)
+    );
+
+    createTask(accountId, "onboarding_processed");
+
+    console.log(`✅ v2 generated for ${accountId}`);
+});
