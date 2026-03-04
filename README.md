@@ -111,8 +111,16 @@ All 10 files are processed in batch.
 
 - Node.js (v18+ recommended)
 - Docker Desktop installed and running
+## Quick Start
 
----
+Clone the repository and run the pipeline:
+
+```bash
+git clone https://github.com/1udialways1/clara-automation.git
+cd clara-automation
+npm install
+npm start
+```
 
 ### Example Output
 
