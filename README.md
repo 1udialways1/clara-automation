@@ -114,6 +114,12 @@ All 10 files are processed in batch.
 
 ---
 
+### Output
+{
+ "company_name": "ABC Fire Protection",
+ "business_hours": "Mon-Fri 8am-6pm",
+ "services_supported": ["sprinkler repair", "inspection"]
+}
 ### Batch Run (All Accounts)
 
 Run the full dataset end-to-end:
